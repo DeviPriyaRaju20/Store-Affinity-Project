@@ -1,0 +1,152 @@
+---
+title: "Untitled"
+author: "DeviPriya"
+date: "December 11, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+#Reading the csv files of all the 3 stores.
+Kohls_Polarity <- read.csv(file="Kohls_Polarity.csv", header=TRUE, sep=",")[ ,2:3]
+head(Kohls_Polarity)
+Macys_Polarity <- read.csv(file="Macys_Polarity.csv", header=TRUE, sep=",")[ ,2:3]
+head(Macys_Polarity)
+JCP_Polarity<-read.csv(file="JCP_Polarity.csv",header=TRUE,sep=",")[ ,2:3]
+head(JCP_Polarity)
+
+#Counting the total number of rows in each dataframe. 
+print(nrow(Kohls_Polarity))
+print(nrow(Macys_Polarity))
+print(nrow(JCP_Polarity))
+
+#Creating a Dataframe for each store which has only postive comments.  
+Kohls_Positive<-(Kohls_Polarity[Kohls_Polarity$FP=="positive",])
+head(Kohls_Positive)
+#Kohls_Negative<-Kohls_Polarity[Polarity$FP=="negative" | Polarity$FP=='neutral',]
+print(nrow(Kohls_Positive))
+
+Macys_Positive<-Macys_Polarity[Macys_Polarity$FP=="positive",]
+#m_df1<-Macys_Polarity[Macys_Polarity$FP=="negative" | Macys_Polarity$FP=='neutral',]
+head(Macys_Positive)
+print(nrow(Macys_Positive))
+#print(nrow(m_df1))
+
+JCP_Positive<-(JCP_Polarity[JCP_Polarity$FP=="positive",])
+head(JCP_Positive)
+#Kohls_Negative<-Kohls_Polarity[Polarity$FP=="negative" | Polarity$FP=='neutral',]
+print(nrow(JCP_Positive))
+```
+```{r}
+#Preparing data for two-sided proportion test.
+
+#Taking a random sample of 220 from all the stores.
+#Kohls_sample<-Kohls_Polarity[sample(230, 220, replace = FALSE, prob = NULL),]
+#Polarity[sample(nrow(Polarity), 3), ]
+#Macys_sample<-Macys_Polarity[sample(280, 220, replace = FALSE, prob = NULL),]
+
+#Craeting a table that contains the Polarity details.
+type<-table(Kohls_Polarity$FP)
+type1<-table(Macys_Polarity$FP)
+type2<-table(JCP_Polarity$FP)
+type
+type1
+type2
+
+#Creating a table that has only the positive polarity of all the 3 stores
+Polarity <- matrix(c(type["positive"],type1["positive"],type2["positive"]),ncol=3,byrow=TRUE)
+colnames(Polarity) <- c("Kohls","Macys","JCP")
+
+Polarity
+
+#Plotting a barplot for the positive polarity of the stores.
+barplot(Polarity, main="Kohls,Macys and JCPenny Postive Analysis", 
+        xlab="Stores",ylab="Number of +ve Comments")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#Prop.test to know which among 3 is best.
+prop.test(c(Polarity[1,1],Polarity[1,2]),n=c(280,280)) #+ve test between kohls and macys
+
+```
+Null Hypothesis:p1=p2
+Alternative Hypothesis:p1!=p2
+where,p1 and p2 represent true proportion of positive comments of Kohls and Macys respectively
+
+```{r}
+#Proportion Test for Kohls and JCPenney
+prop.test(c(Polarity[1,1],Polarity[1,3]),n=c(280,280))
+```
+Null Hypothesis:p1=p3
+Alternative Hypothesis:p1!=p3
+where,p1 and p2 represent true proportion of positive comments of Kohls and JCPenney respectively
+```{r}
+#Proportion Test for Macys and JCPenney
+prop.test(c(Polarity[1,2],Polarity[1,3]),n=c(280,280))
+
+```
+Null Hypothesis:p2=p3
+Alternative Hypothesis:p2!=p3
+where,p1 and p2 represent true proportion of positive comments of Macys and JCPenney respectively
+
+
+Conclusion: We can say that Kohls has almost 42% of the positive comments in our sample,Macys has 35% of the positive comments in our sample and JCPenney has 41% of the positive comments in our sample.From all the proportions test we have conducted, we can conclude that there is not enough evidence to claim that positive comments of Kohls,Macys and JCPenney stores have different proportions as all the pvalues>0.05.In other words,it is simply possible that they might have same proportions of positive comments from the people.
+
+I have chosen prop.test() here, not only to find the similarity or difference in proportions of positive comments, but also to know the % of the positive comments from each store.
+
+
+
+```{r}
+#One sample proportion test to see if the majority of the comments for each the store is +ve or not.
+#Reading the whole data,not just the sample.
+Kohls_Polarity_1 <- read.csv(file="Kohls_Polarity_1.csv", header=TRUE, sep=",")[ ,2:3]
+kohls_tab=table(Kohls_Polarity_1$FP)
+prop.test(kohls_tab[1],n=nrow(Kohls_Polarity_1),p=0.5,alternative="greater")
+
+Macys_Polarity_1 <- read.csv(file="Macys_Polarity_1.csv", header=TRUE, sep=",")[ ,2:3]
+Macys_tab=table(Macys_Polarity_1$FP)
+prop.test(Macys_tab[1],n=nrow(Macys_Polarity_1),p=0.5,alternative="greater")
+
+
+JCP_Polarity_1 <- read.csv(file="JCP_Polarity_1.csv", header=TRUE, sep=",")[ ,2:3]
+JCP_tab=table(JCP_Polarity_1$FP)
+prop.test(JCP_tab[1],n=nrow(JCP_Polarity_1),p=0.5,alternative="greater")
+
+#chisq.test(c(kohls_tab[1],kohls_tab[2],kohls_tab[3]),p=c(0.15,0.43,0.42))
+```
+Null Hypothesis:There is no enough evidence to claim that majority of the comments are negative.
+Alternative Hypothesis:There is enough evidence to claim that majority of the comments are negative.
+
+
+As the pvalue>0.05 in all the 3 cases, we can conclude that there is no evidence to claim that majority of the comments are negative.So,it is safer to buy from these stores.
+```{r}
+#chi squared test conducted on all the categories of the polarity for each of the stores.
+chisq.test(c(kohls_tab[1],kohls_tab[2],kohls_tab[3]))
+chisq.test(c(Macys_tab[1],Macys_tab[2],Macys_tab[3]))
+chisq.test(c(JCP_tab[1],JCP_tab[2],JCP_tab[3]))
+
+```
+```{r}
+chisq.test(c(kohls_tab[3],Macys_tab[3],JCP_tab[3]))
+
+
+```
+Null Hypothesis: All the categories are not equally likely.
+Alternative Hypothesis:All the categories are equally likely.
+
+Conclusion:As we can see that the pvalue<0.05, we can conclude that All categories of comments are almost equally likely in all the 3 stores.
